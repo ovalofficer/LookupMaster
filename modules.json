@@ -4,7 +4,7 @@
           "url": "https://www.411.com/",
           "mask": "phone/1-XXX-XXX-XXXX",
           "api-key": "N/A",
-          "captcha": "False"
+          "captcha": "True"
         },
 
         "FoneFinder.net": {
@@ -32,7 +32,7 @@
           "url": "https://thatsthem.com/",
           "mask": "phone/XXX-XXX-XXXX",
           "api-key": "N/A",
-          "captcha": "False"
+          "captcha": "True"
         }
 
     }
