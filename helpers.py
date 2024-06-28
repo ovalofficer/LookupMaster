@@ -32,7 +32,7 @@ def clean_phone_number(num: str):
     return remove_non_digits(result)
 
 
-def translate_mask(mask: str, phone_number: str):
+def translate_phone_mask(mask: str, phone_number: str):
     # Expected masks: XXX-XXX-XXXX \ area=XXX&rest=XXXXXXX
     n = clean_phone_number(phone_number)
     current_index = 0
@@ -45,3 +45,7 @@ def translate_mask(mask: str, phone_number: str):
             result += c
 
     return result
+
+
+def create_permutations(first_name: str, last_name: str):
+    pass

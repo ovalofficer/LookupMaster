@@ -1,0 +1,32 @@
+{
+  "411.com": {
+    "url": "https://www.411.com/",
+    "mask": "phone/1-XXX-XXX-XXXX",
+    "api-key": "N/A",
+    "captcha": "True"
+  },
+  "FoneFinder.net": {
+    "url": "https://www.fonefinder.net/",
+    "mask": "findome.php?npa=XXX&nxx=XXX&thoublock=XXXX",
+    "api-key": "N/A",
+    "captcha": "False"
+  },
+  "ThatsThem.com": {
+    "url": "https://thatsthem.com/",
+    "mask": "phone/XXX-XXX-XXXX",
+    "api-key": "N/A",
+    "captcha": "True"
+  },
+  "USPhoneBook.com": {
+    "url": "https://www.usphonebook.com/",
+    "mask": "XXX-XXX-XXXX",
+    "api-key": "N/A",
+    "captcha": "True"
+  },
+  "WhitePages.com": {
+    "url": "https://www.whitepages.com/",
+    "mask": "phone/1-XXX-XXX-XXXX",
+    "api-key": "N/A",
+    "captcha": "False"
+  }
+}
