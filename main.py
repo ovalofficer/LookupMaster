@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox as mb
+from tkinter import filedialog as fd
+from tkinter.scrolledtext import ScrolledText
+
 import json
 import webbrowser
 import helpers
@@ -40,7 +43,11 @@ class MenuTab:
                         # split at the . and lower() to get just a plain filename
                         return_dict[filename.split('.')[0].lower()] = json.loads(f.read())
 
+            # Remove mutator dict -- it isn't formatted like the others and can't be viewed yet with module editor
+            return_dict.pop('mutator')
+
             # print(return_dict)
+
             return return_dict
 
         with open(f'modules/{self.module_name}.json') as f:
@@ -72,15 +79,15 @@ class ModuleEditorTab(MenuTab):
         ttk.Label(self.main_frame, text='Captcha: ', justify='right').grid(column=0, row=4)
 
         self.url_var = tk.StringVar()
-        ttk.Entry(self.main_frame, width=32, textvariable=self.url_var).grid(column=1, row=1, pady=2, padx=10,
+        ttk.Entry(self.main_frame, width=32, textvariable=self.url_var).grid(column=1, row=1, pady=5, padx=10,
                                                                              columnspan=3, sticky='we')
 
         self.mask_var = tk.StringVar()
-        ttk.Entry(self.main_frame, width=32, textvariable=self.mask_var).grid(column=1, row=2, pady=2, padx=10,
+        ttk.Entry(self.main_frame, width=32, textvariable=self.mask_var).grid(column=1, row=2, pady=5, padx=10,
                                                                               columnspan=3, sticky='we')
 
         self.api_key_var = tk.StringVar()
-        ttk.Entry(self.main_frame, width=32, textvariable=self.api_key_var).grid(column=1, row=3, pady=2, padx=10,
+        ttk.Entry(self.main_frame, width=32, textvariable=self.api_key_var).grid(column=1, row=3, pady=5, padx=10,
                                                                                  columnspan=3, sticky='we')
 
         self.captcha_var = tk.StringVar()
@@ -148,27 +155,64 @@ class ModuleEditorTab(MenuTab):
 class PermutationTab(MenuTab):
 
     def __init__(self, root):
-        super().__init__(root)
+        super().__init__(root, 'mutator')
 
         self.main_frame.grid_columnconfigure(2, weight=2)
 
-        self.main_textbox = tk.Text(self.main_frame, height=16, width=67, selectbackground='lightgray',
-                                    selectforeground='black')
-        self.main_textbox.grid(sticky='nsw', columnspan=4, row=1)
-
-        self.main_textbox_scrollbar = ttk.Scrollbar(self.main_frame, orient=tk.VERTICAL,
-                                                    command=self.main_textbox.yview)
-        self.main_textbox_scrollbar.grid(column=3, row=1, sticky='nse')
-
-        self.main_textbox['yscrollcommand'] = self.main_textbox_scrollbar.set
-
         # First name entry
+        ttk.Label(self.main_frame, text='First Name:').grid(column=0, row=1, pady=2)
+
         self.first_name_var = tk.StringVar()
-        ttk.Entry(self.main_frame, width=12, textvariable=self.first_name_var).grid(column=1, row=0)
+        self.first_name_entry = ttk.Entry(self.main_frame, textvariable=self.first_name_var)
+        self.first_name_entry.grid(column=1, row=1, sticky='we', columnspan=2)
+
+        # Middle name entry
+        ttk.Label(self.main_frame, text='Middle Name:').grid(column=0, row=2, pady=2)
+
+        self.middle_name_var = tk.StringVar()
+        self.middle_name_entry = ttk.Entry(self.main_frame, textvariable=self.middle_name_var)
+        self.middle_name_entry.grid(column=1, row=2, sticky='we', columnspan=2)
 
         # Last name entry
+        ttk.Label(self.main_frame, text='Last Name:').grid(column=0, row=3, pady=2)
+
         self.last_name_var = tk.StringVar()
-        ttk.Entry(self.main_frame, width=12, textvariable=self.last_name_var).grid(column=2, row=0)
+        self.last_name_entry = ttk.Entry(self.main_frame, textvariable=self.last_name_var)
+        self.last_name_entry.grid(column=1, row=3, sticky='we', columnspan=2)
+
+        ttk.Label(self.main_frame, text='Domain:').grid(column=0, row=4, pady=2)
+
+        self.domain_var = tk.StringVar()
+        self.domain_entry = ttk.Entry(self.main_frame, textvariable=self.domain_var)
+        self.domain_entry.grid(column=1, row=4, sticky='we', columnspan=2)
+
+        self.mode_var = tk.StringVar(value='email')
+
+        self.email_radiobutton = ttk.Radiobutton(self.main_frame, text='E-Mail', variable=self.mode_var, value='email')
+        self.email_radiobutton.grid(column=1, row=0, sticky='w')
+
+        self.extended_email_radiobutton = ttk.Radiobutton(self.main_frame, text='Extended E-Mail',
+                                                          variable=self.mode_var, value='email-extended')
+        self.extended_email_radiobutton.grid(column=1, row=0, sticky='n', columnspan=2)
+
+        self.username_radiobutton = ttk.Radiobutton(self.main_frame, text='Username', variable=self.mode_var,
+                                                    value='username')
+        self.username_radiobutton.grid(column=1, row=5, sticky='w')
+
+        ttk.Label(self.main_frame, text='Username:').grid(column=0, row=6, pady=2)
+
+        self.username_var = tk.StringVar()
+        self.username_entry = ttk.Entry(self.main_frame, textvariable=self.username_var)
+        self.username_entry.grid(column=1, row=6, sticky='we', columnspan=2)
+
+        ttk.Separator(self.main_frame, orient='horizontal').grid(sticky='we', pady=10, columnspan=3, row=7)
+
+        ttk.Label(self.main_frame, text='Numbers of Interest:\n'
+                                        '( - ) denotes range\n'
+                                        'e.g. "1-4" = 1, 2, 3, 4').grid(column=0, row=8, pady=2)
+
+        self.noi_textbox = ScrolledText(self.main_frame, height=10, width=32, font=('Helvetica', 10))
+        self.noi_textbox.grid(column=1, row=8)
 
         # optional textbox entry for numbers of interest
         # optional email domain entry
@@ -177,15 +221,77 @@ class PermutationTab(MenuTab):
         # box for numbers specifically to go onto end
         # option to generate incremental numbers on end or as numbers of interest within specified range
 
-        ttk.Button(self.main_frame, text='Generate Permutations', command=self.generate_permutations).grid(column=3, row=0, sticky='w')
+        ttk.Button(self.main_frame, text='Generate Permutations', command=self.create_results_popup).grid(
+            column=0, columnspan=3, pady=10, sticky='we')
+
+        self.first_name_var.set(value='John')
+        self.last_name_var.set(value='Smith')
+        self.domain_var.set(value='gmail.com')
+
+    def get_noi(self) -> list[str]:
+        # print(list(x for x in self.noi_textbox.get('1.0', END).strip().split('\n') if x != ''))
+        # generator for textbox to remove lines that are only whitespace and trailing spaces
+        return list(x for x in self.noi_textbox.get('1.0', END).strip().split('\n') if x != '')
+
+    def create_results_popup(self):
+
+        t = tk.Toplevel()
+        t.geometry('250x325')
+        t.title('Generated Permutations')
+        t.columnconfigure(0, weight=1)
+        t.resizable(False, False)
+        t.grid()
+
+        frame = ttk.Frame(t, borderwidth=5, relief='solid', padding=5)
+        frame.grid(sticky='nswe')
+
+        perms = self.generate_permutations()
+
+        ttk.Label(frame, text=f'{len(perms)} permutations').grid()
+        results_box = ScrolledText(frame, height=16, width=30, font=('Helvetica', 10))
+        results_box.grid()
+
+        for p in perms:
+            results_box.insert(END, p + '\n')
+
+        ttk.Button(frame, text='Save to File',
+                   command=lambda: self.save_permutations_to_file(results_box.get('1.0', END))).grid(pady=5,
+                                                                                                     sticky='we')
+
+    def save_permutations_to_file(self, results: str):
+
+        file_types = (('Text files', '*.txt'),
+                      ('All files', '*.*'))
+
+        # Starts save as dialog
+        f = fd.asksaveasfile(mode='w', defaultextension='.txt', filetypes=file_types)
+
+        # Returns none if dialog is cancelled
+        if f is None:
+            return
+
+        # Write result data to the file
+        f.write(results.strip())
+
+        # Close file
+        f.close()
 
     def generate_permutations(self):
-        # Probably add all required permutation functions to helpers.py
-        pass
+        if self.mode_var.get() == 'username':
+            return self.generate_username_permutations()
+        elif self.mode_var.get() == 'email' or self.mode_var.get() == 'email-extended':
+            return self.generate_email_permutations()
 
-    def display(self):
-        # Create a Toplevel with a textbox containing all permutations on it
-        pass
+    def generate_email_permutations(self) -> list[str]:
+        noi = helpers.interpret_noi(self.get_noi())
+        masks = self.module_data[self.mode_var.get()]
+        return helpers.generate_email_permutations(self.first_name_var.get(), self.middle_name_var.get(),
+                                                   self.last_name_var.get(), self.domain_var.get(), noi, masks)
+
+    def generate_username_permutations(self) -> list[str]:
+        noi = helpers.interpret_noi(self.get_noi())
+        masks = self.module_data[self.mode_var.get()]
+        return helpers.generate_username_permutations(self.username_var.get(), noi, masks)
 
 
 class PhoneLookupTab(MenuTab):
@@ -245,7 +351,8 @@ class PhoneLookupTab(MenuTab):
                 # TODO: implement webbrowser to open a chrome tab. alternatively, implement scraping. add some way to
                 #  configure scraped information in modules.json, then then offer option to save data to file or
                 #  open in a TopLevel with a textbox
-                print(target['url'] + helpers.translate_phone_mask(target['mask'], self.get_sanitized_number()))
+                print(target['url'] + helpers.translate_phone_mask(target['mask'][0], target['mask'][1],
+                                                                   self.get_sanitized_number()))
 
             # ugly one-liner but does what I want it to -- find better solution for dynamic button placement
             column = 0 if button_counter < 10 else 1
