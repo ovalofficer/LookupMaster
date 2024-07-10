@@ -1,0 +1,8 @@
+{
+  "Facebook.com": {
+    "url": "https://www.facebook.com/",
+    "mask": "search/people/?q=FIRST+LAST",
+    "api-key": "N/A",
+    "captcha": "True"
+  }
+}

@@ -53,6 +53,11 @@ class MenuTab:
         with open(f'modules/{self.module_name}.json') as f:
             return json.loads(f.read())
 
+    # def __del__(self):
+    #     # Untested but this should delete all widgets in the root frame to prevent memory leaks if the object is deleted
+    #     for widget in self.main_frame.winfo_children():
+    #         widget.destroy()
+
 
 class ModuleEditorTab(MenuTab):
 
@@ -62,8 +67,10 @@ class ModuleEditorTab(MenuTab):
         self.main_frame.grid_columnconfigure(2, weight=2)
 
         self.main_listbox_var = tk.StringVar()
+
+        # CDCDCD is color code for windows scrollbar color
         self.main_listbox = tk.Listbox(self.main_frame, height=16, width=67,
-                                       selectbackground='lightgray', selectforeground='black', exportselection=False)
+                                       selectbackground='#CDCDCD', selectforeground='black', exportselection=False)
         self.main_listbox.grid(sticky='nsw', columnspan=4)
         self.main_listbox_scrollbar = ttk.Scrollbar(self.main_frame, orient=tk.VERTICAL,
                                                     command=self.main_listbox.yview)
@@ -73,31 +80,55 @@ class ModuleEditorTab(MenuTab):
 
         self.main_listbox.bind('<<ListboxSelect>>', lambda x: [self.listbox_item_selected()])
 
-        ttk.Label(self.main_frame, text='URL: ', justify='right').grid(column=0, row=1)
-        ttk.Label(self.main_frame, text='Mask: ', justify='right').grid(column=0, row=2)
-        ttk.Label(self.main_frame, text='API Key: ', justify='right').grid(column=0, row=3)
-        ttk.Label(self.main_frame, text='Captcha: ', justify='right').grid(column=0, row=4)
+        ttk.Label(self.main_frame, text='Title: ', justify='right').grid(column=0, row=1)
+        ttk.Label(self.main_frame, text='URL: ', justify='right').grid(column=0, row=2)
+        ttk.Label(self.main_frame, text='Mask: ', justify='right').grid(column=0, row=3)
+        ttk.Label(self.main_frame, text='API Key: ', justify='right').grid(column=0, row=4)
+        ttk.Label(self.main_frame, text='Captcha: ', justify='right').grid(column=0, row=5)
+
+        self.module_title_var = tk.StringVar()
+        self.module_title_entry = ttk.Entry(self.main_frame, width=32, textvariable=self.module_title_var)
+
+        self.module_title_entry.grid(column=1, row=1, pady=5, padx=10, columnspan=3, sticky='we')
+
+        self.module_title_entry.bind('<Any-KeyRelease>', lambda x: [self.module_title_validation()])
 
         self.url_var = tk.StringVar()
-        ttk.Entry(self.main_frame, width=32, textvariable=self.url_var).grid(column=1, row=1, pady=5, padx=10,
+        ttk.Entry(self.main_frame, width=32, textvariable=self.url_var).grid(column=1, row=2, pady=5, padx=10,
                                                                              columnspan=3, sticky='we')
 
         self.mask_var = tk.StringVar()
-        ttk.Entry(self.main_frame, width=32, textvariable=self.mask_var).grid(column=1, row=2, pady=5, padx=10,
+        ttk.Entry(self.main_frame, width=32, textvariable=self.mask_var).grid(column=1, row=3, pady=5, padx=10,
                                                                               columnspan=3, sticky='we')
 
         self.api_key_var = tk.StringVar()
-        ttk.Entry(self.main_frame, width=32, textvariable=self.api_key_var).grid(column=1, row=3, pady=5, padx=10,
+        ttk.Entry(self.main_frame, width=32, textvariable=self.api_key_var).grid(column=1, row=4, pady=5, padx=10,
                                                                                  columnspan=3, sticky='we')
 
         self.captcha_var = tk.StringVar()
         ttk.Checkbutton(self.main_frame, variable=self.captcha_var, onvalue='True', offvalue='False').grid(
-            column=1, row=4, sticky='w', pady=2, padx=10)
+            column=1, row=5, sticky='w', pady=2, padx=10)
 
-        ttk.Button(self.main_frame, text='Save Module File', command=self.save_module_file).grid(column=2, row=4,
-                                                                                                 sticky='w')
-        ttk.Button(self.main_frame, text='Add New Module').grid(column=2, row=4, sticky='e')
+        ttk.Button(self.main_frame, text='Save Module', command=self.save_module_file).grid(column=2, row=5,
+                                                                                            sticky='w')
+        self.add_module_button = ttk.Button(self.main_frame, text='Add New Module to File',
+                                            command=self.add_empty_module)
+        self.add_module_button.grid(column=2, row=5, sticky='e')
 
+        self.update_main_listbox()
+
+    def module_title_validation(self):
+        self.module_title_var.set(helpers.remove_all_whitespace(self.module_title_var.get()))
+
+    def add_empty_module(self):
+        template = {
+            "url": "",
+            "mask": "",
+            "api-key": "N/A",
+            "captcha": "False"
+        }
+        name = helpers.get_alternate_name('NewModule', self.module_data[self.get_current_item_category()])
+        self.module_data[self.get_current_item_category()][name] = template
         self.update_main_listbox()
 
     def update_main_listbox(self):
@@ -112,16 +143,19 @@ class ModuleEditorTab(MenuTab):
                               icon='warning')
 
     def save_module_file(self):
-        # with open(self.get_current_item_category() + '.json', 'w') as f:
-        self.set_current_selection_attribute('url', self.url_var.get())
-        self.set_current_selection_attribute('mask', self.mask_var.get())
-        self.set_current_selection_attribute('api-key', self.api_key_var.get())
-        self.set_current_selection_attribute('captcha', self.captcha_var.get())
-
         if self.verify_overwrite():
-            # with open(self.get_current_item_category(), 'w') as f:
-            #     f.write(json.dumps(self.module_data, indent=2))
-            print(json.dumps(self.module_data, indent=2))
+            new_module = {
+                'url': self.url_var.get(),
+                'mask': self.mask_var.get(),
+                'api-key': self.api_key_var.get(),
+                'captcha': self.captcha_var.get()
+            }
+            del self.module_data[self.get_current_item_category()][self.get_current_item_title()]
+            self.module_data[self.get_current_item_category()][self.module_title_var.get()] = new_module
+
+            with open('modules/' + self.get_current_item_filename(), 'w') as f:
+                f.write(json.dumps(self.module_data[self.get_current_item_category()], indent=2))
+            # print(json.dumps(self.module_data, indent=2))
             self.refresh_module_data()
             self.update_main_listbox()
 
@@ -130,7 +164,7 @@ class ModuleEditorTab(MenuTab):
 
     def listbox_item_selected(self):
         item_values = self.get_current_item_values()
-
+        self.module_title_var.set(self.get_current_item_title())
         self.url_var.set(item_values['url'])
         self.mask_var.set(item_values['mask'])
         self.api_key_var.set(item_values['api-key'])
@@ -141,6 +175,9 @@ class ModuleEditorTab(MenuTab):
             return ''
         else:
             return self.main_listbox.get(self.main_listbox.curselection())
+
+    def get_current_item_filename(self):
+        return self.get_current_selection().split(' ')[0]
 
     def get_current_item_category(self):
         return self.get_current_selection().split('.', 1)[0].lower()
@@ -236,7 +273,7 @@ class PermutationTab(MenuTab):
     def create_results_popup(self):
 
         t = tk.Toplevel()
-        t.geometry('250x325')
+        t.geometry('300x325')
         t.title('Generated Permutations')
         t.columnconfigure(0, weight=1)
         t.resizable(False, False)
@@ -248,7 +285,7 @@ class PermutationTab(MenuTab):
         perms = self.generate_permutations()
 
         ttk.Label(frame, text=f'{len(perms)} permutations').grid()
-        results_box = ScrolledText(frame, height=16, width=30, font=('Helvetica', 10))
+        results_box = ScrolledText(frame, height=16, width=37, font=('Helvetica', 10))
         results_box.grid()
 
         for p in perms:
@@ -335,6 +372,16 @@ class PhoneLookupTab(MenuTab):
     def get_sanitized_number(self):
         return helpers.clean_phone_number(self.phone_var.get())
 
+    def refresh_buttons(self):
+        self.clear_buttons()
+        self.create_buttons()
+
+    def clear_buttons(self):
+        for button in self.buttons.values():
+            button.destroy()
+
+        self.buttons = {}
+
     def create_buttons(self):
         button_counter = 0
 
@@ -347,12 +394,92 @@ class PhoneLookupTab(MenuTab):
                 if not self.phone_entry_msg.cget('text') == 'Valid Number':
                     return
 
+                r = target['url'] + helpers.translate_phone_mask(target['mask'][0], target['mask'][1],
+                                                                 self.get_sanitized_number())
                 # Desired click operation goes here.
                 # TODO: implement webbrowser to open a chrome tab. alternatively, implement scraping. add some way to
                 #  configure scraped information in modules.json, then then offer option to save data to file or
                 #  open in a TopLevel with a textbox
-                print(target['url'] + helpers.translate_phone_mask(target['mask'][0], target['mask'][1],
-                                                                   self.get_sanitized_number()))
+                print(r)
+                webbrowser.open_new(r)
+
+            # ugly one-liner but does what I want it to -- find better solution for dynamic button placement
+            column = 0 if button_counter < 10 else 1
+            button_counter += 1
+
+            # Have to add to grid after, otherwise .grid operation returns None
+            self.buttons[n.lower()] = ttk.Button(self.main_frame, text=n + '*' if d['captcha'] == 'True' else n,
+                                                 command=on_click)
+            self.buttons[n.lower()].grid(sticky='ew', column=column, row=button_counter + 4, padx=10, pady=2)
+
+            # Adds CAPTCHA text next to button when applicable
+            # if d['captcha'] == 'True':
+            #     ttk.Label(self.main_frame, text='CAPTCHA', foreground='red', font=('Helvetica', 12, 'bold')).grid(
+            #         column=column + 1, sticky='nsew', row=button_counter + 3)
+
+
+class EmailLookupTab(MenuTab):
+    def __init__(self, root):
+        super().__init__(root, 'email')
+
+        self.main_frame.grid_columnconfigure(1, weight=2)
+
+        self.email_entry_label = ttk.Label(self.main_frame, text='Enter an E-Mail Address (name@example.com)')
+        self.email_entry_label.grid(pady=5, columnspan=2, sticky='n')
+
+        self.email_var = tk.StringVar()
+        self.email_entry = ttk.Entry(self.main_frame, textvariable=self.email_var, width=18, justify=tk.CENTER,
+                                     font=('Helvetica', 12, 'bold'))
+        self.email_entry.grid(pady=5, padx=10, columnspan=2, sticky='we')
+
+        # For best practice, this should eventually use a StringVar and refresh dynamically
+        self.email_entry_msg = ttk.Label(self.main_frame, text='Invalid E-Mail', foreground='red')
+        self.email_entry_msg.grid(columnspan=2, sticky='n')
+
+        self.email_entry.bind('<Any-KeyRelease>', lambda x: [self.email_input_validation()])
+
+        self.buttons = {}
+
+        self.create_buttons()
+
+    def email_input_validation(self):
+        self.email_var.set(self.email_var.get().strip())
+
+        if helpers.validate_email_format(self.email_var.get()):
+            self.email_entry_msg.config(text='Valid E-Mail', foreground='green')
+        else:
+            self.email_entry_msg.config(text='Invalid E-Mail', foreground='red')
+
+    def refresh_buttons(self):
+        self.clear_buttons()
+        self.create_buttons()
+
+    def clear_buttons(self):
+        for button in self.buttons.values():
+            button.destroy()
+
+        self.buttons = {}
+
+    def create_buttons(self):
+        button_counter = 0
+
+        for n, d in self.module_data.items():
+            # print(n, d)
+
+            # Have to create an on-click function for the button to use.
+            def on_click(target=d):
+                # print('Button Clicked')
+                if not self.email_entry_msg.cget('text') == 'Valid E-Mail':
+                    return
+
+                # Desired click operation goes here.
+                # TODO: implement webbrowser to open a chrome tab. alternatively, implement scraping. add some way to
+                #  configure scraped information in modules.json, then then offer option to save data to file or
+                #  open in a TopLevel with a textbox
+
+                r = target['url'] + target['mask'].replace('X', self.email_var.get())
+                print(r)
+                webbrowser.open_new(r)
 
             # ugly one-liner but does what I want it to -- find better solution for dynamic button placement
             column = 0 if button_counter < 10 else 1
@@ -383,15 +510,22 @@ class UsernameLookupTab(MenuTab):
                                         font=('Helvetica', 12, 'bold'))
         self.username_entry.grid(pady=5, padx=10, columnspan=2, sticky='we')
 
+        # todo: check for non url-safe chars; validate_username method
         self.username_entry.bind('<Any-KeyRelease>', lambda x: [])
 
         self.buttons = {}
 
         self.create_buttons()
 
+    def refresh_buttons(self):
+        self.clear_buttons()
+        self.create_buttons()
+
     def clear_buttons(self):
         for button in self.buttons.values():
             button.destroy()
+
+        self.buttons = {}
 
     def create_buttons(self):
         self.clear_buttons()
@@ -408,7 +542,10 @@ class UsernameLookupTab(MenuTab):
                 # TODO: implement webbrowser to open a chrome tab. alternatively, implement scraping. add some way to
                 #  configure scraped information in modules.json, then then offer option to save data to file or
                 #  open in a TopLevel with a textbox
-                print(target['url'] + target['mask'].replace('X', self.username_var.get()))
+
+                r = target['url'] + target['mask'].replace('X', self.username_var.get())
+                print(r)
+                webbrowser.open_new(r)
 
             # TODO: find better solution for dynamic button placement
             if button_counter > 20:
@@ -438,24 +575,27 @@ class App:
         self.main_notebook = ttk.Notebook(self.window, padding=5)
         self.main_notebook.grid(sticky='nswe')
 
-        self.username_lookup_frame = ttk.Frame(self.main_notebook)
+        #self.name_lookup_frame = ttk.Frame(self.main_notebook)
+        #self.main_notebook.add(self.name_lookup_frame, text='Name')
+
         self.phone_lookup_frame = ttk.Frame(self.main_notebook)
-        self.name_lookup_frame = ttk.Frame(self.main_notebook)
-        self.module_editor_frame = ttk.Frame(self.main_notebook)
-        self.permutation_frame = ttk.Frame(self.main_notebook)
-
         self.main_notebook.add(self.phone_lookup_frame, text='Phone')
-        self.main_notebook.add(self.name_lookup_frame, text='Name')
-        self.main_notebook.add(self.username_lookup_frame, text='Username')
-        self.main_notebook.add(self.module_editor_frame, text='Module Editor')
-        self.main_notebook.add(self.permutation_frame, text='Permutator')
-
-        self.module_editor = ModuleEditorTab(self.module_editor_frame)
-
         self.phone_lookup = PhoneLookupTab(self.phone_lookup_frame)
 
+        self.username_lookup_frame = ttk.Frame(self.main_notebook)
+        self.main_notebook.add(self.username_lookup_frame, text='Username')
         self.username_lookup = UsernameLookupTab(self.username_lookup_frame)
 
+        self.email_frame = ttk.Frame(self.main_notebook)
+        self.main_notebook.add(self.email_frame, text='E-Mail')
+        self.email_lookup = EmailLookupTab(self.email_frame)
+
+        self.module_editor_frame = ttk.Frame(self.main_notebook)
+        self.main_notebook.add(self.module_editor_frame, text='Module Editor')
+        self.module_editor = ModuleEditorTab(self.module_editor_frame)
+
+        self.permutation_frame = ttk.Frame(self.main_notebook)
+        self.main_notebook.add(self.permutation_frame, text='Permutator')
         self.permutator = PermutationTab(self.permutation_frame)
 
 

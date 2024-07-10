@@ -1,6 +1,5 @@
 {
   "email": [
-    "%M%LAST%NOI%DOMAIN",
     "%F%M%LAST%NOI%DOMAIN",
     "%F%L%MIDDLE%NOI%DOMAIN",
     "%MIDDLE%L%NOI%DOMAIN",

@@ -1,0 +1,26 @@
+{
+  "Facebook.com": {
+    "url": "https://www.facebook.com/",
+    "mask": "search?q=X",
+    "api-key": "N/A",
+    "captcha": "True"
+  },
+  "Whoisology.com": {
+    "url": "https://whoisology.com/",
+    "mask": "email/X/1",
+    "api-key": "N/A",
+    "captcha": "True"
+  },
+  "ThatsThem.com": {
+    "url": "https://thatsthem.com/",
+    "mask": "email/X",
+    "api-key": "N/A",
+    "captcha": "True"
+  },
+  "OpenPGP": {
+    "url": "https://keys.openpgp.org/",
+    "mask": "search?q=X",
+    "api-key": "N/A",
+    "captcha": "False"
+  }
+}

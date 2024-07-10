@@ -5,34 +5,40 @@
     "api-key": "N/A",
     "captcha": "True"
   },
-    "NameCheck.com": {
+  "NameCheck.com": {
     "url": "https://www.namecheck.com/",
     "mask": "en/searchresult/?domain=X",
     "api-key": "N/A",
     "captcha": "True"
   },
-    "ProfileDiscover.com": {
+  "ProfileDiscover.com": {
     "url": "https://www.profilediscover.com/",
     "mask": "X/",
     "api-key": "N/A",
     "captcha": "True"
   },
-    "InstantUsername.com": {
+  "InstantUsername.com": {
     "url": "https://www.instantusername.com/",
     "mask": "?q=X",
     "api-key": "N/A",
     "captcha": "True"
   },
-    "PGP.MIT.EDU": {
-      "url": "https://pgp.mit.edu/",
-      "mask": "pks/lookup?search=X&op=index",
-      "api-key": "N/A",
-      "captcha": "False"
-    },
-    "SocialBlade.com": {
-      "url": "https://socialblade.com/",
-      "mask": "search/search?query=X",
-      "api-key": "N/A",
-      "captcha": "False"
-    }
+  "PGP.MIT.EDU": {
+    "url": "https://pgp.mit.edu/",
+    "mask": "pks/lookup?search=X&op=index",
+    "api-key": "N/A",
+    "captcha": "False"
+  },
+  "SocialBlade.com": {
+    "url": "https://socialblade.com/",
+    "mask": "search/search?query=X",
+    "api-key": "N/A",
+    "captcha": "False"
+  },
+  "GitHub": {
+    "url": "https://github.com/",
+    "mask": "X",
+    "api-key": "N/A",
+    "captcha": "True"
+  }
 }
